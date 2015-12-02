@@ -1,5 +1,5 @@
 FactoryGirl.define do
   factory :host do
-    name 'foreman_plugin_template'
+    name 'foreman_colly'
   end
 end
