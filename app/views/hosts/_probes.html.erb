@@ -1,0 +1,27 @@
+<table id="properties_table" class="table table-bordered table-striped">
+  <thead>
+    <tr>
+      <th><%= _('Probe') %></th>
+      <th><%= _('Value') %></th>
+    </tr>
+  </thead>
+  <tbody>
+  <% probes.keys.sort.each do |key| %>
+    <% values = probes[key] %>
+      <% if values.count == 1 %>
+        <tr>
+          <td><%= key %></td>
+          <td><%= probes[key]['value'] rescue '?' %></td>
+        </tr>
+      <% else %>
+        <% values.keys.sort.each do |value_key| %>
+          <tr>
+            <td><%= key %>/<%= value_key %></td>
+            <td><%= values[value_key] %></td>
+          </tr>
+        <% end %>
+      <% end %>
+    </tr>
+  <% end %>
+  </tbody>
+</table>

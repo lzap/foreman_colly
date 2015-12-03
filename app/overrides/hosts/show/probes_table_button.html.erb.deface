@@ -1,0 +1,2 @@
+<!-- insert_bottom '#myTab' -->
+<li><a href="#probes" data-toggle="tab"><%= _('Probes') %></a></li>

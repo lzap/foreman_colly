@@ -8,8 +8,8 @@ module ForemanColly
     config.autoload_paths += Dir["#{config.root}/app/helpers/concerns"]
     config.autoload_paths += Dir["#{config.root}/app/models/concerns"]
     config.autoload_paths += Dir["#{config.root}/app/overrides"]
+    config.autoload_paths += Dir["#{config.root}/lib"]
 
-    # Add any db migrations
     initializer 'foreman_colly.load_app_instance_data' do |app|
       ForemanColly::Engine.paths['db/migrate'].existent.each do |path|
         app.config.paths['db/migrate'] << path
@@ -18,31 +18,24 @@ module ForemanColly
 
     initializer 'foreman_colly.register_plugin', after: :finisher_hook do |_app|
       Foreman::Plugin.register :foreman_colly do
-        requires_foreman '>= 1.4'
+        requires_foreman '>= 1.10'
 
-        # Add permissions
-        security_block :foreman_colly do
-          permission :view_foreman_colly, :'foreman_colly/hosts' => [:new_action]
-        end
+        #security_block :foreman_colly do
+          #permission :view_foreman_colly, :'foreman_colly/hosts' => [:new_action]
+        #end
 
-        # Add a new role called 'Discovery' if it doesn't exist
-        role 'ForemanColly', [:view_foreman_colly]
+        #role 'ForemanColly', [:view_foreman_colly]
 
-        # add menu entry
-        menu :top_menu, :template,
-             url_hash: { controller: :'foreman_colly/hosts', action: :new_action },
-             caption: 'ForemanColly',
-             parent: :hosts_menu,
-             after: :hosts
+        #menu :top_menu, :template,
+             #url_hash: { controller: :'foreman_colly/hosts', action: :new_action },
+             #caption: 'ForemanColly',
+             #parent: :hosts_menu,
+             #after: :hosts
 
-        # add dashboard widget
-        widget 'foreman_colly_widget', name: N_('Foreman plugin template widget'), sizex: 4, sizey: 1
+        widget 'single_probe_widget', name: N_('Single probe widget'), sizex: 6, sizey: 1
       end
     end
 
-    # Precompile any JS or CSS files under app/assets/
-    # If requiring files from each other, list them explicitly here to avoid precompiling the same
-    # content twice.
     assets_to_precompile =
       Dir.chdir(root) do
         Dir['app/assets/javascripts/**/*', 'app/assets/stylesheets/**/*'].map do |f|
@@ -56,14 +49,10 @@ module ForemanColly
       SETTINGS[:foreman_colly] = { assets: { precompile: assets_to_precompile } }
     end
 
-    # Include concerns in this config.to_prepare block
     config.to_prepare do
-      begin
-        Host::Managed.send(:include, ForemanColly::HostExtensions)
-        HostsHelper.send(:include, ForemanColly::HostsHelperExtensions)
-      rescue => e
-        Rails.logger.warn "ForemanColly: skipping engine hook (#{e})"
-      end
+      ::Host::Managed.send :include, ForemanColly::HostExtensions
+      ::HostsController.send :include, ForemanColly::HostsControllerExtensions
+      ::Api::V2::HostsController.send :include, ForemanColly::Api::V2::HostsControllerExtensions
     end
 
     rake_tasks do
@@ -77,5 +66,18 @@ module ForemanColly
       locale_domain = 'foreman_colly'
       Foreman::Gettext::Support.add_text_domain locale_domain, locale_dir
     end
+
+    initializer 'foreman_colly.deface_host_view' do |_app|
+      Deface::Override.new(:virtual_path => "hosts/show.html.erb",
+                       :name => "remove_parent_organization_on_create",
+                       :insert_bottom => 'erb[loud]:contains("select_f"):contains(":parent")',
+                       :text => '<% if taxonomy.is_a?(Location) %><%= render_original %><% end %>'
+                       )
+    end
+
+  end
+
+  def self.logger
+    Foreman::Logging.logger('foreman_colly')
   end
 end

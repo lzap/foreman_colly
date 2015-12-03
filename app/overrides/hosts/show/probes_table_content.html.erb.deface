@@ -1,0 +1,7 @@
+<!-- insert_after '#metrics' -->
+<div class="tab-pane" id="probes" data-ajax-url='<%= probes_host_path(@host)%>'>
+  <p id="spinner">
+    <%= image_tag 'spinner.gif' %>
+    <%= _('Loading template information ...') %>
+  </p>
+</div>
