@@ -1,11 +1,19 @@
 # Foreman Colly
 
-Foreman plugin which integrates with Collectd providing live data and notifications from smart proxies and managed hosts. Features:
+Foreman plugin brings integration with collectd providing live data and
+notifications from smart proxies and managed hosts.
 
-* Bootstraping collectd deamon on managed hosts (provisioning template snippet).
+## Features
+
 * Reading live probes for individual hosts from collectd daemon (via UNIX socket).
+* Showing probes in Host detail page.
 * Live plot as a dashboard widget.
 * Listening to notification messages and writing them in the Rails log.
+
+## Planned features
+
+* Bootstraping collectd deamon on managed hosts (provisioning template snippet).
+* Plot configurations via templating system (extensible).
 
 ## Installation
 
@@ -16,15 +24,35 @@ for how to install Foreman plugins
 
 ## Usage
 
-*Usage here*
+Install and configure a collectd deamon on the foreman server itself and
+configure it to accept local connections via UNIX socket from Foreman:
 
-## TODO
+    LoadPlugin unixsock
+    <Plugin unixsock>
+        SocketFile "/var/run/collectd-unixsock"
+        SocketGroup "foreman"
+        SocketPerms "0660"
+        DeleteSocket false
+    </Plugin>
 
-*Todo list here*
+If you want collectd daemons to reach out the Foreman instance via collectd
+native network protocol (UDP based), configure:
 
-## Contributing
+    LoadPlugin network
+    <Plugin "network">
+        Listen "0.0.0.0"
+    </Plugin>
 
-*TODO*
+Configuration of managed hosts is easy. Install and setup collectd instance
+and configure it to send the data over the network:
+
+    LoadPlugin network
+    <Plugin "network">
+        Server foreman.example.com
+    </Plugin>
+
+When Smart Proxy Colly plugin is in use, configure it
+[accordingly](https://github.com/lzap/smart_proxy_colly).
 
 ## Copyright
 

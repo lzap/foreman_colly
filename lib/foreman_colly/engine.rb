@@ -10,6 +10,10 @@ module ForemanColly
     config.autoload_paths += Dir["#{config.root}/app/overrides"]
     config.autoload_paths += Dir["#{config.root}/lib"]
 
+    initializer 'foreman_colly.load_default_settings', :before => :load_config_initializers do |app|
+      require_dependency File.expand_path("../../../app/models/setting/colly.rb", __FILE__) if (Setting.table_exists? rescue(false))
+    end
+
     initializer 'foreman_colly.load_app_instance_data' do |app|
       ForemanColly::Engine.paths['db/migrate'].existent.each do |path|
         app.config.paths['db/migrate'] << path
@@ -18,7 +22,7 @@ module ForemanColly
 
     initializer 'foreman_colly.register_plugin', after: :finisher_hook do |_app|
       Foreman::Plugin.register :foreman_colly do
-        requires_foreman '>= 1.10'
+        requires_foreman '>= 1.11'
 
         #security_block :foreman_colly do
           #permission :view_foreman_colly, :'foreman_colly/hosts' => [:new_action]
@@ -33,6 +37,13 @@ module ForemanColly
              #after: :hosts
 
         widget 'single_probe_widget', name: N_('Single probe widget'), sizex: 6, sizey: 1
+
+        extend_page "smart_proxies/show" do |cx|
+          # cx.add_pagelet :main_tabs, :name => "Probes", :partial => "smart_proxies/show/probe_contents"
+          # Setting::Colly.colly_proxy_probes.each do |probe_name|
+          #   cx.add_pagelet :probe_contents, :partial => "smart_proxies/show/configured_probes_pagelet", :probe_name => probe_name
+          # end
+        end
       end
     end
 
@@ -52,6 +63,7 @@ module ForemanColly
     config.to_prepare do
       ::Host::Managed.send :include, ForemanColly::HostExtensions
       ::HostsController.send :include, ForemanColly::HostsControllerExtensions
+      ::SmartProxiesHelper.send :include, ForemanColly::SmartProxiesHelperExtensions
       ::Api::V2::HostsController.send :include, ForemanColly::Api::V2::HostsControllerExtensions
     end
 

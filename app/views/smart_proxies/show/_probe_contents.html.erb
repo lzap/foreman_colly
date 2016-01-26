@@ -1,0 +1,7 @@
+<div class="row">
+  <% pagelets_for(:probe_contents).each do |pagelet| %>
+    <div class="col-md-6" align="center">
+      <%= render_pagelet(pagelet, :smart_proxy => @smart_proxy) %>
+    </div>
+  <% end %>
+</div>

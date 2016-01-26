@@ -1,0 +1,49 @@
+<% plotid = probe_name_html_attribute_safe(pagelet.probe_name) %>
+
+<h4 class="header ca"><%= pagelet.probe_name %></h4>
+
+<div class="plot-container">
+  <div id="<%= plotid %>" style="width:520px;height:260px"></div>
+</div>
+
+
+<script type="text/javascript">
+$(function() {
+var ix = 0;
+var data = new Array();
+for (ix = 0; ix < 50; ix++) {
+  data.push([ix, 0]);
+}
+
+var plot = $.plot("#<%= plotid %>", [data], {
+  series: {
+    shadowSize: 0
+  },
+  xaxis: {
+    show: false
+  }
+});
+
+function fetchData() {
+  function onDataReceived(json) {
+    value = json.probe.value || json.probe.seconds
+    data = data.slice(1).concat([[ix++, value]])
+    plot.setData([data]);
+    plot.setupGrid();
+    plot.draw();
+  }
+
+  $.ajax({
+    url: "/api/v2/hosts/<%= URI.parse(@smart_proxy.url).host %>/read_probe/<%= pagelet.probe_name %>",
+    type: "GET",
+    dataType: "json",
+    success: onDataReceived
+  });
+
+  setTimeout(fetchData, 2000);
+}
+fetchData();
+
+});
+</script>
+
