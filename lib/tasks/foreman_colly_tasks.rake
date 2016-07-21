@@ -36,9 +36,7 @@ namespace :foreman_colly do
   end
 end
 
-Rake::Task[:test].enhance do
-  Rake::Task['test:foreman_colly'].invoke
-end
+Rake::Task["test:plugins"].enhance ['test:foreman_colly']
 
 load 'tasks/jenkins.rake'
 if Rake::Task.task_defined?(:'jenkins:unit')

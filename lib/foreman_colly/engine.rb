@@ -24,9 +24,18 @@ module ForemanColly
       Foreman::Plugin.register :foreman_colly do
         requires_foreman '>= 1.11'
 
-        #security_block :foreman_colly do
-          #permission :view_foreman_colly, :'foreman_colly/hosts' => [:new_action]
-        #end
+        security_block :host_probes do
+          permission :view_host_probes, {
+            :hosts => [:probes],
+            :"api/v2/hosts" => [:list_probes, :read_probe, :read_probes]
+          }
+        end
+
+        security_block :colly_reports do
+          permission :create_colly_reports, {
+            :"api/v2/colly_reports" => [:create]
+          }
+        end
 
         #role 'ForemanColly', [:view_foreman_colly]
 
