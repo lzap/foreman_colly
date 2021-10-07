@@ -22,7 +22,7 @@ module Api
         @colly_report = ::ForemanColly::ReportImporter.import(params[:colly_report])
         render_message('Report created', :status => :ok) if @colly_report.save
       rescue ::Foreman::Exception => e
-        render_message(e.to_s, :status => :unprocessable_entity)
+        render_exception(e, :status => :unprocessable_entity)
       end
 
       private

@@ -6,7 +6,7 @@ class Setting::Colly < ::Setting
 
     Setting.transaction do
       [
-        self.set('colly_proxy_probes', N_("Probes for the Smart Proxy show page (separate by comma, Rails restart needed)"), "cpu/percent-system, memory/memory-free, swap/swap-free, webrick-request-time-avg/duration"),
+        self.set('colly_proxy_probes', N_("Probes for the Foreman Smart Proxy show page (separate by comma, Rails restart needed)"), "cpu/percent-system, memory/memory-free, swap/swap-free, webrick-request-time-avg/duration"),
       ].compact.each { |s| self.create s.update(:category => "Setting::Colly")}
     end
 

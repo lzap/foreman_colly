@@ -51,7 +51,7 @@ and configure it to send the data over the network:
         Server foreman.example.com
     </Plugin>
 
-When Smart Proxy Colly plugin is in use, configure it
+When Foreman Smart Proxy Colly plugin is in use, configure it
 [accordingly](https://github.com/lzap/smart_proxy_colly).
 
 ## Copyright
